@@ -4,6 +4,7 @@ import { listTasks, deleteTask } from '../api/tasks';
 import { useAuth } from '../context/AuthContext';
 import TaskFilters from '../components/TaskFilters';
 import TaskList from '../components/TaskList';
+import TaskForm from '../components/TaskForm';
 
 const DEFAULT_FILTERS = { status: '', priority: '' };
 
@@ -12,6 +13,7 @@ export default function TasksPage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [formTask, setFormTask] = useState(undefined);
 
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -43,8 +45,17 @@ export default function TasksPage() {
   }
 
   function handleEdit(task) {
-    // TaskForm will be wired in todo 6
-    console.log('edit', task);
+    setFormTask(task);
+  }
+
+  function handleSave(saved) {
+    setTasks((prev) => {
+      const exists = prev.find((t) => t.id === saved.id);
+      return exists
+        ? prev.map((t) => (t.id === saved.id ? saved : t))
+        : [saved, ...prev];
+    });
+    setFormTask(undefined);
   }
 
   function handleLogout() {
@@ -57,7 +68,7 @@ export default function TasksPage() {
       <header className="tasks-header">
         <h1>My Tasks</h1>
         <div className="tasks-header__actions">
-          <button type="button" className="btn-primary" onClick={() => console.log('create')}>
+          <button type="button" className="btn-primary" onClick={() => setFormTask(null)}>
             Create Task
           </button>
           <button type="button" className="btn-link" onClick={handleLogout}>
@@ -83,6 +94,14 @@ export default function TasksPage() {
           <TaskList tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} />
         )}
       </main>
+
+      {formTask !== undefined && (
+        <TaskForm
+          task={formTask}
+          onClose={() => setFormTask(undefined)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }
