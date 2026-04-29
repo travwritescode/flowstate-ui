@@ -3,11 +3,27 @@ import { useNavigate } from 'react-router-dom';
 import { login, register } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 
+function validate(email, password) {
+  const errors = {};
+  if (!email) {
+    errors.email = 'Email is required.';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = 'Enter a valid email address.';
+  }
+  if (!password) {
+    errors.password = 'Password is required.';
+  } else if (password.length < 8) {
+    errors.password = 'Password must be at least 8 characters.';
+  }
+  return errors;
+}
+
 export default function LoginPage() {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { saveToken } = useAuth();
@@ -17,7 +33,14 @@ export default function LoginPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setApiError('');
+
+    const errors = validate(email, password);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
     setLoading(true);
 
     try {
@@ -34,11 +57,11 @@ export default function LoginPage() {
     } catch (err) {
       const status = err.response?.status;
       if (status === 401) {
-        setError('Invalid email or password.');
+        setApiError('Invalid email or password.');
       } else if (status === 409) {
-        setError('An account with that email already exists.');
+        setApiError('An account with that email already exists.');
       } else {
-        setError('Something went wrong. Please try again.');
+        setApiError('Something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -47,7 +70,8 @@ export default function LoginPage() {
 
   function toggleMode() {
     setMode(isLogin ? 'register' : 'login');
-    setError('');
+    setFieldErrors({});
+    setApiError('');
   }
 
   return (
@@ -55,13 +79,13 @@ export default function LoginPage() {
       <div className="auth-card">
         <h1>{isLogin ? 'Sign In' : 'Create Account'}</h1>
 
-        {error && (
+        {apiError && (
           <p role="alert" className="error-message">
-            {error}
+            {apiError}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit}>
           <div className="field">
             <label htmlFor="email">Email</label>
             <input
@@ -70,8 +94,15 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
+              aria-invalid={!!fieldErrors.email}
+              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
               required
             />
+            {fieldErrors.email && (
+              <p id="email-error" role="alert" className="field-error">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className="field">
@@ -82,8 +113,16 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={isLogin ? 'current-password' : 'new-password'}
+              aria-invalid={!!fieldErrors.password}
+              aria-describedby={fieldErrors.password ? 'password-error' : undefined}
               required
+              minLength={8}
             />
+            {fieldErrors.password && (
+              <p id="password-error" role="alert" className="field-error">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
 
           <button type="submit" className="btn-primary" disabled={loading}>
