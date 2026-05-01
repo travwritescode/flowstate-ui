@@ -1,16 +1,18 @@
-# React + Vite
+# flowstate-ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite client for FlowState tasks. Talks to the FlowState REST API (`http://localhost:8000` in local dev).
 
-Currently, two official plugins are available:
+**Companion API:** [flowstate-api](https://github.com/travwritescode/flowstate-api).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Contracts / broker:** [Pactflow](https://pactflow.io/) (hosted Pact broker) — see [docs.pactflow.io](https://docs.pactflow.io/).
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Local development
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The dev server listens on port **3000** (see [`vite.config.js`](vite.config.js)).
